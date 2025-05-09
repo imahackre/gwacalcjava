@@ -108,7 +108,6 @@ public class GradeCalculator {
             System.out.print("Enter finals weight: ");
             double finalWeight = input.nextDouble();
             
-            // Clear the newline
             input.nextLine();
             
             // Validate weights sum to 1.0 (100%)
