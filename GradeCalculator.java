@@ -21,6 +21,7 @@ public class GradeCalculator {
     public static class Subject {
         private String name;
         private int units;
+        private double grade;
         private double prelimGrade;
         private double midtermGrade;
         private double finalGrade;
@@ -34,6 +35,15 @@ public class GradeCalculator {
             this.prelimWeight = prelimWeight;
             this.midtermWeight = midtermWeight;
             this.finalWeight = finalWeight;
+        }
+
+        public Subject(String name, int units, double grade) {
+            this.name = name;
+            this.units = units;
+            this.grade = grade;
+            this.prelimWeight = 0.0;
+            this.midtermWeight = 0.0;
+            this.finalWeight = 0.0;
         }
         
         public void setGrade(double prelim, double midterm, double finals) {
@@ -49,7 +59,11 @@ public class GradeCalculator {
         }
         
         public double calculateGradePoint() {
+            if (prelimWeight == 0.0 && midtermWeight == 0.0 && finalWeight == 0.0) {
+                return grade;
+            } else {
             return percentageToPoint(calculateGrade());
+            }
         }
         
         // Getters
@@ -73,97 +87,180 @@ public class GradeCalculator {
     public static double calculateGWA(List<Subject> subjects) {
         double totalWeightedPoints = 0.0;
         int totalUnits = 0;
-        
+
         for (Subject subject : subjects) {
             double gradePoint = subject.calculateGradePoint();
             totalWeightedPoints += gradePoint * subject.getUnits();
             totalUnits += subject.getUnits();
         }
-        
+
         return totalWeightedPoints / totalUnits;
     }
     
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
         List<Subject> subjects = new ArrayList<>();
-        
-        System.out.println("Grade and GWA Calculator");
-        System.out.println("------------------------");
-        
-        // Input subjects
-        while (true) {
-            System.out.print("\nEnter subject name (or 'done' to finish): ");
-            String name = input.nextLine();
-            if (name.equalsIgnoreCase("done")) break;
-            
-            System.out.print("Enter number of units: ");
-            int units = input.nextInt();
-            
-            System.out.print("Enter prelim weight (e.g., 0.3 for 30%): ");
-            double prelimWeight = input.nextDouble();
-            
-            System.out.print("Enter midterm weight: ");
-            double midtermWeight = input.nextDouble();
-            
-            System.out.print("Enter finals weight: ");
-            double finalWeight = input.nextDouble();
-            
-            input.nextLine();
-            
-            // Validate weights sum to 1.0 (100%)
-            if (Math.abs((prelimWeight + midtermWeight + finalWeight) - 1.0) > 0.001) {
-                System.out.println("Error: Weights must sum to 1.0 (100%)");
-                continue;
+
+        do {
+            System.out.println("Grade and/or GWA Calculator");
+            System.out.println("------------------------");
+            String choice;
+            System.out.print("Do you want to calculate grades and then calculate GWA (1) or skip to GWA calculation? (2): ");
+            choice = input.nextLine();
+            if (choice.equalsIgnoreCase("2")) {
+                System.out.println("Skipped to GWA calculation.");
+                System.out.println("--------------------------------------------------");
+
+                while (true) {
+                    System.out.print("\nEnter subject name (or 'done' to finish): ");
+                    String name = input.nextLine();
+                    if (name.equalsIgnoreCase("done")) break;
+                    
+                    int units = 0;
+                    do {
+                        System.out.print("Enter number of units: ");
+                        try {
+                            units = input.nextInt();
+                            break; // Exit loop if input is valid
+                        } catch (Exception e) {
+                            System.out.println("Invalid input. Please enter a valid number of units.");
+                            input.nextLine(); // Clear the invalid input
+                            continue;
+                        }
+                    } while (true);
+
+                    double grade = 0.0;
+                    do {
+                        System.out.print("Enter grade (1.00-5.00): ");
+                        try {
+                            grade = input.nextDouble();
+                            break;
+                        } catch (Exception e) {
+                            System.out.println("Invalid input. Please enter a valid grade.");
+                            input.nextLine(); // Clear the invalid input
+                            continue;
+                        }
+                    } while (true);
+                    
+                    input.nextLine();
+                    
+                    Subject subject = new Subject(name, units, grade);
+                    subjects.add(subject);
+
+                }
+
+                    if (!subjects.isEmpty()) {
+                        double gwa = calculateGWA(subjects);
+                        System.out.printf("\nOverall GWA: %.2f\n", gwa);
+                        System.out.println("--------------------------------------------------");
+
+                        System.out.printf("Press Enter to restart or type 'exit' to quit: ");
+                        String restart = input.nextLine();
+
+                        if (restart.equalsIgnoreCase("exit")) {
+                            System.out.println("Exiting the program.");
+                            input.close();
+                            return;
+                        } else {
+                            subjects.clear(); // Clear subjects for a new calculation
+                            continue;
+                        }
+                    } else {
+                        System.out.println("No subjects entered.");
+                    }
+
+                } else if (choice.equalsIgnoreCase("1")) {
+                    System.out.println("Proceeding to grade calculation.");
+                    System.out.println("--------------------------------------------------");
+                 // Input subjects
+                    while (true) {
+                        System.out.print("\nEnter subject name (or 'done' to finish): ");
+                        String name = input.nextLine();
+                        if (name.equalsIgnoreCase("done")) break;
+                        
+                        System.out.print("Enter number of units: ");
+                        int units = input.nextInt();
+                        
+                        System.out.print("Enter prelim weight (e.g., 0.3 for 30%): ");
+                        double prelimWeight = input.nextDouble();
+                        
+                        System.out.print("Enter midterm weight: ");
+                        double midtermWeight = input.nextDouble();
+                        
+                        System.out.print("Enter finals weight: ");
+                        double finalWeight = input.nextDouble();
+                        
+                        // Clear the newline
+                        input.nextLine();
+                        
+                        // Validate weights sum to 1.0 (100%)
+                        if (Math.abs((prelimWeight + midtermWeight + finalWeight) - 1.0) > 0.001) {
+                            System.out.println("Error: Weights must sum to 1.0 (100%)");
+                            continue;
+                        }
+                        
+                        Subject subject = new Subject(name, units, prelimWeight, midtermWeight, finalWeight);
+                        
+                        // Input grades
+                        System.out.print("Enter prelim grade (%): ");
+                        double prelimGrade = input.nextDouble();
+                        
+                        System.out.print("Enter midterm grade (%): ");
+                        double midtermGrade = input.nextDouble();
+                        
+                        System.out.print("Enter finals grade (%): ");
+                        double finalGrade = input.nextDouble();
+                        
+                        input.nextLine(); // Clear the newline
+                        
+                        subject.setGrade(prelimGrade, midtermGrade, finalGrade);
+                        subjects.add(subject);
+                        
+                        // Show immediate results for this subject
+                        double finalPercentage = subject.calculateGrade();
+                        double gradePoint = subject.calculateGradePoint();
+                        
+                        System.out.printf("\n%s Results:\n", subject.getSubjectName());
+                        System.out.printf("Final Grade: %.2f%%\n", finalPercentage);
+                        System.out.printf("Grade Point: %.2f\n", gradePoint);
+                    }
+                    
+                    // Calculate and display GWA if subjects were entered
+                    if (!subjects.isEmpty()) {
+                        double gwa = calculateGWA(subjects);
+                        System.out.printf("\nOverall GWA: %.2f\n", gwa);
+                        
+                        // Detailed breakdown
+                        System.out.println("\nSubject Breakdown:");
+                        System.out.println("--------------------------------------------------");
+                        System.out.println("Subject\t\tUnits\tFinal%\tPoint");
+                        System.out.println("--------------------------------------------------");
+                        
+                        for (Subject subject : subjects) {
+                            System.out.printf("%s\t%d\t%.2f\t%.2f\n", 
+                                subject.getSubjectName(),
+                                subject.getUnits(),
+                                subject.calculateGrade(),
+                                subject.calculateGradePoint());
+                        }
+                        System.out.println("--------------------------------------------------");
+                        System.out.printf("Press Enter to restart or type 'exit' to quit: ");
+                        String restart = input.nextLine();
+
+                        if (restart.equalsIgnoreCase("exit")) {
+                            System.out.println("Exiting the program.");
+                            input.close();
+                            return;
+                        } else {
+                            subjects.clear(); // Clear subjects for a new calculation
+                            continue;
+                        }
+                    } else {
+                        System.out.println("No subjects entered.");
+                    }
+            } else {
+                System.out.println("Invalid choice. Please enter '1' or '2'.");
             }
-            
-            Subject subject = new Subject(name, units, prelimWeight, midtermWeight, finalWeight);
-            
-            // Input grades
-            System.out.print("Enter prelim grade (%): ");
-            double prelimGrade = input.nextDouble();
-            
-            System.out.print("Enter midterm grade (%): ");
-            double midtermGrade = input.nextDouble();
-            
-            System.out.print("Enter finals grade (%): ");
-            double finalGrade = input.nextDouble();
-            
-            input.nextLine(); // Clear the newline
-            
-            subject.setGrade(prelimGrade, midtermGrade, finalGrade);
-            subjects.add(subject);
-            
-            // Show immediate results for this subject
-            double finalPercentage = subject.calculateGrade();
-            double gradePoint = subject.calculateGradePoint();
-            
-            System.out.printf("\n%s Results:\n", subject.getSubjectName());
-            System.out.printf("Final Grade: %.2f%%\n", finalPercentage);
-            System.out.printf("Grade Point: %.2f\n", gradePoint);
-        }
-        
-        // Calculate and display GWA if subjects were entered
-        if (!subjects.isEmpty()) {
-            double gwa = calculateGWA(subjects);
-            System.out.printf("\nOverall GWA: %.2f\n", gwa);
-            
-            // Detailed breakdown
-            System.out.println("\nSubject Breakdown:");
-            System.out.println("--------------------------------------------------");
-            System.out.println("Subject\t\tUnits\tFinal%\tPoint");
-            System.out.println("--------------------------------------------------");
-            
-            for (Subject subject : subjects) {
-                System.out.printf("%s\t%d\t%.2f\t%.2f\n", 
-                    subject.getSubjectName(),
-                    subject.getUnits(),
-                    subject.calculateGrade(),
-                    subject.calculateGradePoint());
-            }
-        } else {
-            System.out.println("No subjects entered.");
-        }
-        
-        input.close();
+        } while (true);
     }
 }
