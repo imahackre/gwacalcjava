@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -117,17 +118,20 @@ public class GradeCalculator {
                     if (name.equalsIgnoreCase("done")) break;
                     
                     int units = 0;
-                    do {
-                        System.out.print("Enter number of units: ");
+                    while (true) {
                         try {
-                            units = input.nextInt();
-                            break; // Exit loop if input is valid
-                        } catch (Exception e) {
-                            System.out.println("Invalid input. Please enter a valid number of units.");
-                            input.nextLine(); // Clear the invalid input
-                            continue;
-                        }
-                    } while (true);
+                    System.out.print("Enter number of units: ");
+                    units = input.nextInt();
+                    if (units <= 0) throw new IllegalArgumentException("Units must be positive.");
+                    break;
+                    } catch (InputMismatchException e) {
+                    System.out.println("Error: Please enter a valid number.");
+                    input.nextLine(); // Clear the invalid input
+                    } catch (IllegalArgumentException e) {
+                    System.out.println("Error: " + e.getMessage());
+                    input.nextLine(); // Clear invalid input
+                    }
+                }
 
                     double grade = 0.0;
                     do {
@@ -178,38 +182,105 @@ public class GradeCalculator {
                         String name = input.nextLine();
                         if (name.equalsIgnoreCase("done")) break;
                         
+                        int units = 0;
+                        double prelimWeight = 0.0;
+                        double midtermWeight = 0.0;
+                        double finalWeight = 0.0;
+
+                        while (true) {
+                            try {
                         System.out.print("Enter number of units: ");
-                        int units = input.nextInt();
-                        
+                        units = input.nextInt();
+                        if (units <= 0) throw new IllegalArgumentException("Units must be positive.");
+                        break;
+                        } catch (InputMismatchException e) {
+                        System.out.println("Error: Please enter a valid number.");
+                        input.nextLine(); // Clear the invalid input
+                        } catch (IllegalArgumentException e) {
+                        System.out.println("Error: " + e.getMessage());
+                        input.nextLine(); // Clear invalid input
+                        }
+                    }
+                    while (true) {
+                        while (true) {
+                            try {
                         System.out.print("Enter prelim weight (e.g., 0.3 for 30%): ");
-                        double prelimWeight = input.nextDouble();
-                        
+                        prelimWeight = input.nextDouble();
+                        break;
+                        } catch (Exception e) {
+                        System.out.println("Error: Please enter a valid number.");
+                        input.nextLine(); // Clear the invalid input
+                        continue;
+                        }
+                    }
+                        while (true) {
+                            try {
                         System.out.print("Enter midterm weight: ");
-                        double midtermWeight = input.nextDouble();
-                        
+                        midtermWeight = input.nextDouble();
+                        break;
+                        } catch (Exception e) {
+                        System.out.println("Error: Please enter a valid number.");
+                        input.nextLine(); // Clear the invalid input
+                        continue;
+                        }
+                    }
+                        while (true) {
+                            try {
                         System.out.print("Enter finals weight: ");
-                        double finalWeight = input.nextDouble();
-                        
-                        // Clear the newline
-                        input.nextLine();
-                        
+                        finalWeight = input.nextDouble();
+                        break;
+                        } catch (Exception e) {
+                        System.out.println("Error: Please enter a valid number.");
+                        input.nextLine(); // Clear the invalid input
+                        continue;
+                        }
+                    }
                         // Validate weights sum to 1.0 (100%)
                         if (Math.abs((prelimWeight + midtermWeight + finalWeight) - 1.0) > 0.001) {
-                            System.out.println("Error: Weights must sum to 1.0 (100%)");
+                            System.out.println("Error: Weights must sum to 1.0 (100%).");
                             continue;
-                        }
-                        
+                        }  
+                        break;
+                    }
+                        input.nextLine();
+
                         Subject subject = new Subject(name, units, prelimWeight, midtermWeight, finalWeight);
                         
+                        double prelimGrade = 0.0, midtermGrade = 0.0, finalGrade = 0.0;
                         // Input grades
+                        while (true) {
+                            try {
                         System.out.print("Enter prelim grade (%): ");
-                        double prelimGrade = input.nextDouble();
-                        
+                        prelimGrade = input.nextDouble();
+                        break;
+                        } catch (Exception e) {
+                        System.out.println("Error: Please enter a valid grade.");
+                        input.nextLine(); // Clear the invalid input
+                        continue;
+                        }
+                    }       
+                        while (true) {  
+                            try {
                         System.out.print("Enter midterm grade (%): ");
-                        double midtermGrade = input.nextDouble();
-                        
-                        System.out.print("Enter finals grade (%): ");
-                        double finalGrade = input.nextDouble();
+                        midtermGrade = input.nextDouble();
+                        break;
+                        } catch (Exception e) {
+                        System.out.println("Error: Please enter a valid number.");
+                        input.nextLine(); // Clear the invalid input
+                        continue;
+                        }
+                    }
+                        while (true) {
+                        try {
+                        System.out.print("Enter final grade (%): ");
+                        finalGrade = input.nextDouble();
+                        break;
+                        } catch (Exception e) {
+                        System.out.println("Error: Please enter a valid number.");
+                        input.nextLine(); // Clear the invalid input
+                        continue;
+                        }
+                    }
                         
                         input.nextLine(); // Clear the newline
                         
@@ -236,12 +307,12 @@ public class GradeCalculator {
                         System.out.println("Subject\t\tUnits\tFinal%\tPoint");
                         System.out.println("--------------------------------------------------");
                         
-                        for (Subject subject : subjects) {
+                        for (Subject subj : subjects) {
                             System.out.printf("%s\t%d\t%.2f\t%.2f\n", 
-                                subject.getSubjectName(),
-                                subject.getUnits(),
-                                subject.calculateGrade(),
-                                subject.calculateGradePoint());
+                                subj.getSubjectName(),
+                                subj.getUnits(),
+                                subj.calculateGrade(),
+                                subj.calculateGradePoint());
                         }
                         System.out.println("--------------------------------------------------");
                         System.out.printf("Press Enter to restart or type 'exit' to quit: ");
